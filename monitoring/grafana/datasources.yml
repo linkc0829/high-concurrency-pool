@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # 這裡直接寫死 Docker 內部的網址，以後重啟都不用再設定了
+    url: http://prometheus:9090 
+    isDefault: true
+    editable: true
