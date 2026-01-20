@@ -212,7 +212,7 @@
         "x": 12,
         "y": 0
       },
-      "id": 6,
+      "id": 5,
       "options": {
         "legend": {
           "calcs": [],
@@ -230,8 +230,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(kafka_topic_partition_current_offset{topic=~\"${topic}-dlq\"}[$__rate_interval]))\r\n",
-          "legendFormat": "DLQ Publish RPS",
+          "expr": "kafka_consumergroup_members{consumergroup=\"$group\"}\r\n",
+          "legendFormat": "Group Members",
           "range": true,
           "refId": "A"
         },
@@ -241,15 +241,41 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "(\r\n  sum(rate(kafka_topic_partition_current_offset{topic=~\"${topic}-dlq\"}[5m]))\r\n)\r\n/\r\nclamp_min(\r\n  sum(rate(kafka_topic_partition_current_offset{topic=\"$topic\"}[5m])),\r\n  1\r\n)\r\n",
+          "expr": "kafka_consumergroup_lag_sum{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
           "hide": false,
           "instant": false,
-          "legendFormat": "DLQ Ratio（DLQ / Input）",
+          "legendFormat": "Total Lag",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "kafka_consumergroup_lag{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Lag by Partition p={{partition}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "kafka_consumergroup_current_offset{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Current Offset by Partition  p={{partition}}",
+          "range": true,
+          "refId": "D"
         }
       ],
-      "title": "DLQ",
+      "title": "Kafka Consumer Group（Lag / Members / Offsets）",
       "type": "timeseries"
     },
     {
@@ -452,7 +478,7 @@
         "x": 12,
         "y": 8
       },
-      "id": 7,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": [],
@@ -470,8 +496,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "kafka_topic_partitions{topic=\"$topic\"}\r\n",
-          "legendFormat": "Partitions",
+          "expr": "sum(rate(kafka_topic_partition_current_offset{topic=~\"${topic}-dlq\"}[$__rate_interval]))\r\n",
+          "legendFormat": "DLQ Publish RPS",
           "range": true,
           "refId": "A"
         },
@@ -481,28 +507,15 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(kafka_topic_partition_under_replicated_partition{topic=\"$topic\"})\r\n",
+          "expr": "(\r\n  sum(rate(kafka_topic_partition_current_offset{topic=~\"${topic}-dlq\"}[5m]))\r\n)\r\n/\r\nclamp_min(\r\n  sum(rate(kafka_topic_partition_current_offset{topic=\"$topic\"}[5m])),\r\n  1\r\n)\r\n",
           "hide": false,
           "instant": false,
-          "legendFormat": "Under Replicated Partitions",
+          "legendFormat": "DLQ Ratio（DLQ / Input）",
           "range": true,
           "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "min(kafka_topic_partition_in_sync_replica{topic=\"$topic\"})\r\n",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Min ISR",
-          "range": true,
-          "refId": "C"
         }
       ],
-      "title": "DLQ Ratio（DLQ / Input）",
+      "title": "DLQ",
       "type": "timeseries"
     },
     {
@@ -679,7 +692,7 @@
         "x": 12,
         "y": 16
       },
-      "id": 5,
+      "id": 7,
       "options": {
         "legend": {
           "calcs": [],
@@ -697,8 +710,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "kafka_consumergroup_members{consumergroup=\"$group\"}\r\n",
-          "legendFormat": "Group Members",
+          "expr": "kafka_topic_partitions{topic=\"$topic\"}\r\n",
+          "legendFormat": "Partitions",
           "range": true,
           "refId": "A"
         },
@@ -708,10 +721,10 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "kafka_consumergroup_lag_sum{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
+          "expr": "sum(kafka_topic_partition_under_replicated_partition{topic=\"$topic\"})\r\n",
           "hide": false,
           "instant": false,
-          "legendFormat": "Total Lag",
+          "legendFormat": "Under Replicated Partitions",
           "range": true,
           "refId": "B"
         },
@@ -721,28 +734,15 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "kafka_consumergroup_lag{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
+          "expr": "min(kafka_topic_partition_in_sync_replica{topic=\"$topic\"})\r\n",
           "hide": false,
           "instant": false,
-          "legendFormat": "Lag by Partition p={{partition}}",
+          "legendFormat": "Min ISR",
           "range": true,
           "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "kafka_consumergroup_current_offset{consumergroup=\"$group\", topic=\"$topic\"}\r\n",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Current Offset by Partition",
-          "range": true,
-          "refId": "D"
         }
       ],
-      "title": "Kafka Consumer Group（Lag / Members / Offsets）",
+      "title": "Kafka Topic / Partition Health",
       "type": "timeseries"
     },
     {
@@ -864,10 +864,197 @@
       ],
       "title": "Backpressure",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(process_cpu_seconds_total{job=\"go_worker_pool\", instance=\"host.docker.internal:8080\"}[1m])",
+          "legendFormat": "CPU (cores)",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU (cores)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{job=\"go_worker_pool\", instance=\"host.docker.internal:8080\"} / 1024 / 1024",
+          "legendFormat": "RSS (MiB)",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RSS (MiB)",
+      "type": "timeseries"
     }
   ],
   "preload": false,
-  "refresh": "5s",
   "schemaVersion": 42,
   "tags": [],
   "templating": {
@@ -926,12 +1113,12 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Kafka Worker Pool",
   "uid": "ad6bg4v",
-  "version": 5
+  "version": 11
 }
